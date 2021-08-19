@@ -16,6 +16,42 @@ window.addEventListener('resize', () => {
     renderPlayground();
 });
 
+//Pozycja Gracza
+let playerPositionX = getWidth()/2;
+let playerPositionY = getHeight()/2;
+
+const checkPlayerPosition = () => {
+    if(playerPositionX <=20){
+        playerPositionX = 20;
+    } else if (playerPositionX >= getWidth()-20) {
+        playerPositionX = getWidth()-20;
+    } else if (playerPositionY <=20) {
+        playerPositionY = 20;
+    } else if (playerPositionY >= getHeight()-20) {
+        playerPositionY = getHeight()-20;
+    }
+}
+//Sterowanie Grazem
+//WASD
+document.addEventListener("keydown", keyDownHandler, false);
+function keyDownHandler(e) {
+    if(e.key == "w") {
+        playerPositionY -= 10;
+        checkPlayerPosition();
+    }
+    else if(e.key =="a") {
+        playerPositionX -= 10;
+        checkPlayerPosition();
+    }
+    else if(e.key =="s") {
+        playerPositionY += 10;
+        checkPlayerPosition();
+    }
+    else if(e.key =="d") {
+        playerPositionX += 10;
+        checkPlayerPosition();
+    }
+}
 //Stworzenie wzoru Gracza
 class Player {
     constructor(x,y) {
@@ -25,96 +61,57 @@ class Player {
     draw() {
         c.beginPath();
         c.arc(this.x, this.y, 20,0,2*Math.PI);
-        c.fillRect(this.x,this.y-15,40,10);
         c.fillStyle = 'green';
         c.fill();
         c.stroke();
     }
+    update() {
+        this.draw();
+        this.x = playerPositionX;
+        this.y = playerPositionY;
+    }
+}
+const player = new Player(playerPositionX,playerPositionY);
 
+//Strzelanie
+class Bullet {
+    constructor(x,y,velocity) {
+        this.x = x;
+        this.y = y;
+        this.velocity = velocity;
+    }
+    draw() {
+        c.beginPath();
+        c.arc(this.x, this.y, 3,0,2*Math.PI);
+        c.fillStyle = 'yellow';
+        c.fill();
+    } 
+    update() {
+        this.draw();
+        this.x = this.x + this.velocity.x;
+        this.y = this.y + this.velocity.y;
+    }
 }
-//Pozycja Gracza
-let playerPositionX = getWidth()/2;
-let playerPositionY = getHeight()/2;
+const bullet = new Bullet(playerPositionX,playerPositionY,{x:1, y:1});
+const bullets = [];
 
-//Sterowanie Graczem
-var W_pressed = false;
-var A_pressed = false;
-var S_pressed = false;
-var D_pressed = false;
-
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-
-function keyDownHandler(e) {
-    if(e.key == "w") {
-        W_pressed = true;
-        console.log(W_pressed);
-        console.log(playerPositionY);
-    }
-    else if(e.key =="a") {
-        A_pressed = true;
-        console.log(A_pressed);
-        console.log(playerPositionX);
-    }
-    else if(e.key =="s") {
-        S_pressed = true;
-        console.log(S_pressed);
-        console.log(playerPositionY);
-    }
-    else if(e.key =="d") {
-        D_pressed = true;
-        console.log(D_pressed);
-        console.log(playerPositionX);
-    }
+function animate() {
+    requestAnimationFrame(animate);
+    c.clearRect(0,0, canvas.width, canvas.height);
+    bullets.forEach(bullet => {
+        bullet.update();
+    });
+    player.update();
+    console.log('pozycja x:'+ playerPositionX + 'pozycja y:' + playerPositionY);
 }
-function keyUpHandler(e) {
-    if(e.key == "w") {
-        W_pressed = false;
+window.addEventListener('click', (e) => {
+    const angle = Math.atan2(e.clientY - playerPositionY,e.clientX - playerPositionX);
+    const velocity = {
+        x: Math.cos(angle),
+        y: Math.sin(angle)
     }
-    else if(e.key =="a") {
-        A_pressed = false;
-    }
-    else if(e.key =="s") {
-        S_pressed = false;
-    }
-    else if(e.key =="d") {
-        D_pressed = false;
-    }
-}
-let X = 10;
-console.log(X);
-if(W_pressed) {
-    X -= 10;
-    playerPositionY += 5;
-    console.log(X);
-    renderPlayground();
-}
-else if(S_pressed) {
-    playerPositionY -= 5;
-    renderPlayground();
-}
-else if(D_pressed) {
-    playerPositionX += 5;
-    renderPlayground();
-}
-else if(A_pressed) {
-    playerPositionX -= 5;
-    renderPlayground();
-}
-
-//Rednerowanie Gry
-const renderPlayground = () => {
-    const player = new Player(playerPositionX,playerPositionY);
-    player.draw();
-}
-
+    console.log(angle);
+    bullets.push(new Bullet(playerPositionX,playerPositionY,velocity));
+})
+animate();
 setCanvasDimensions();
-renderPlayground();
-
-//Testy
-//Jaką wartość zwraca getWidth i getHeight
-console.log(getHeight());
-console.log(getWidth());
-
-console.log(W_pressed);
-console.log(S_pressed);

@@ -2,4 +2,12 @@ body {
     margin: 0 auto;
     padding: 0;
     min-height: 100vh;
+    background-color: rgb(123, 186, 248);
+}
+#menu_container {
+    display: block;
+    padding: 0;
+    text-align: center;
+    height: 400px;
+    width: 500px;
 }
